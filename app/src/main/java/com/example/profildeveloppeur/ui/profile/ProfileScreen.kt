@@ -1,5 +1,6 @@
 package com.example.profildeveloppeur.ui.profile
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -115,10 +116,19 @@ fun ProfileScreen(
     }
 }
 
-@Preview(name = "Profil Android junior (disponible)", showBackground = true)
+// ---------- Previews de l'écran complet ----------
+// showSystemUi affiche la fiche dans un cadre de téléphone ; heightDp (dernière preview)
+// agrandit la zone pour voir toute la fiche d'un coup.
+
+@Preview(
+    name = "Écran — Android junior · clair",
+    group = "Écran",
+    showBackground = true,
+    showSystemUi = true
+)
 @Composable
-fun ProfileScreenAndroidJuniorPreview() {
-    ProfilDeveloppeurTheme {
+fun ProfileScreenLightPreview() {
+    ProfilDeveloppeurTheme(darkTheme = false) {
         ProfileScreen(
             profile = androidJuniorProfile,
             onContactClick = {},
@@ -127,10 +137,33 @@ fun ProfileScreenAndroidJuniorPreview() {
     }
 }
 
-@Preview(name = "Profil full-stack (non disponible)", showBackground = true)
+@Preview(
+    name = "Écran — Android junior · sombre",
+    group = "Écran",
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+fun ProfileScreenDarkPreview() {
+    ProfilDeveloppeurTheme(darkTheme = true) {
+        ProfileScreen(
+            profile = androidJuniorProfile,
+            onContactClick = {},
+            onPortfolioClick = {}
+        )
+    }
+}
+
+@Preview(
+    name = "Écran — Full-stack (non disponible) · fiche complète",
+    group = "Écran",
+    showBackground = true,
+    heightDp = 1800
+)
 @Composable
 fun ProfileScreenFullstackPreview() {
-    ProfilDeveloppeurTheme {
+    ProfilDeveloppeurTheme(darkTheme = false) {
         ProfileScreen(
             profile = fullstackProfile,
             onContactClick = {},
