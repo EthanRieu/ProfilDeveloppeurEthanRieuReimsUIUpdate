@@ -20,14 +20,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -314,17 +319,75 @@ private fun SkillCategory.icon(): ImageVector = when (this) {
     SkillCategory.DATABASE -> Icons.AutoMirrored.Filled.List
 }
 
-/** Information secondaire sous la forme « libellé : valeur » (contact, localisation…). */
+/**
+ * Zone de contact : regroupe les informations structurées du profil
+ * dans une Surface cohérente avec le thème.
+ */
 @Composable
-fun InfoLine(
-    label: String,
-    value: String,
+fun ContactSection(
+    email: String,
+    location: String,
+    availability: String,
+    isAvailable: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = "$label : $value",
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = modifier
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = MaterialTheme.shapes.large
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SectionTitle(title = "Contact")
+            ContactField(
+                label = "Email",
+                value = email,
+                icon = Icons.Filled.Email
+            )
+            ContactField(
+                label = "Localisation",
+                value = location,
+                icon = Icons.Filled.LocationOn
+            )
+            ContactField(
+                label = "Disponibilité",
+                value = availability,
+                icon = if (isAvailable) Icons.Filled.CheckCircle else Icons.Filled.Info
+            )
+        }
+    }
+}
+
+/**
+ * Information structurée affichée dans un OutlinedTextField en LECTURE SEULE :
+ * le champ garde l'apparence Material (libellé, bordure, icône) mais n'est pas modifiable.
+ */
+@Composable
+fun ContactField(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        // Lecture seule : aucune modification possible, le callback ne fait rien
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(text = label) },
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                // Le libellé du champ décrit déjà l'information
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        shape = MaterialTheme.shapes.medium,
+        textStyle = MaterialTheme.typography.bodyLarge,
+        modifier = modifier.fillMaxWidth()
     )
 }
 

@@ -95,13 +95,13 @@ fun ProfileScreen(
             }
 
             item(key = "contact") {
-                Column(modifier = sectionModifier) {
-                    SectionTitle(title = "Informations")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InfoLine(label = "Contact", value = profile.email)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    InfoLine(label = "Localisation", value = profile.location)
-                }
+                ContactSection(
+                    email = profile.email,
+                    location = profile.location,
+                    availability = profile.availability,
+                    isAvailable = profile.isAvailable,
+                    modifier = sectionModifier
+                )
             }
 
             item(key = "actions") {
