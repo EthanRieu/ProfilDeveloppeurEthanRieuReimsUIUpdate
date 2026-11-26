@@ -15,7 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,8 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import com.example.profildeveloppeur.R
+import com.example.profildeveloppeur.model.Skill
+import com.example.profildeveloppeur.model.SkillCategory
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -137,24 +146,48 @@ fun SectionTitle(
     )
 }
 
-/** Une compétence affichée dans une petite pastille colorée. */
+/**
+ * Compétence affichée sous forme de pastille : icône (selon la catégorie) + nom.
+ * Composable réutilisable, utilisé pour chaque élément de la LazyRow des compétences.
+ */
 @Composable
-fun SkillItem(
-    skill: String,
+fun SkillChip(
+    skill: Skill,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = MaterialTheme.shapes.small
     ) {
-        // Padding INTERNE : espace entre le bord de la pastille et le texte
-        Text(
-            text = skill,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-        )
+        // Padding INTERNE : espace entre le bord de la pastille et son contenu
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = skill.category.icon(),
+                // La catégorie est lue par les lecteurs d'écran avant le nom de la compétence
+                contentDescription = skill.category.label,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = skill.name,
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
     }
+}
+
+/** Icône associée à chaque catégorie de compétence. */
+private fun SkillCategory.icon(): ImageVector = when (this) {
+    SkillCategory.LANGUAGE -> Icons.Filled.Create
+    SkillCategory.FRAMEWORK -> Icons.Filled.Build
+    SkillCategory.TOOL -> Icons.Filled.Settings
+    SkillCategory.DATABASE -> Icons.AutoMirrored.Filled.List
 }
 
 /** Information secondaire sous la forme « libellé : valeur » (contact, localisation…). */

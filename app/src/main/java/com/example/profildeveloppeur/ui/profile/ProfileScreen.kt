@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,6 +22,8 @@ import com.example.profildeveloppeur.model.androidJuniorProfile
 import com.example.profildeveloppeur.model.fullstackProfile
 import com.example.profildeveloppeur.ui.theme.ProfilDeveloppeurTheme
 
+private val ScreenHorizontalPadding = 16.dp
+
 /**
  * Écran principal : un Scaffold qui contient une LazyColumn.
  * Chaque section de la fiche est un `item` de la liste : l'écran défile verticalement
@@ -33,13 +36,17 @@ fun ProfileScreen(
     onAvailabilityClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Marge horizontale commune à toutes les sections de la fiche
+    val sectionModifier = Modifier.padding(horizontal = ScreenHorizontalPadding)
+
     Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
         LazyColumn(
-            // innerPadding évite les barres système, le contentPadding écarte le contenu des bords
+            // innerPadding évite les barres système. La marge horizontale est appliquée
+            // par section (sectionModifier) pour laisser la LazyRow défiler jusqu'aux bords.
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
+            contentPadding = PaddingValues(vertical = 24.dp),
             // Espace identique entre toutes les sections
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -48,43 +55,51 @@ fun ProfileScreen(
                     name = profile.name,
                     role = profile.role,
                     location = profile.location,
-                    isAvailable = profile.isAvailable
+                    isAvailable = profile.isAvailable,
+                    modifier = sectionModifier
                 )
             }
 
             item(key = "description") {
                 Text(
                     text = profile.description,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = sectionModifier
                 )
             }
 
             item(key = "skills") {
                 Column {
-                    SectionTitle(title = "Compétences")
+                    SectionTitle(title = "Compétences", modifier = sectionModifier)
                     Spacer(modifier = Modifier.height(8.dp))
-                    profile.skills.forEach { skill ->
-                        SkillItem(
-                            skill = skill.name,
-                            modifier = Modifier.padding(bottom = 6.dp)
-                        )
+                    // LazyRow : liste horizontale, chaque compétence est un SkillChip réutilisable.
+                    // Elle occupe toute la largeur ; le contentPadding aligne la 1re pastille
+                    // sur les autres sections tout en laissant défiler sous les bords.
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = ScreenHorizontalPadding),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(items = profile.skills, key = { it.name }) { skill ->
+                            SkillChip(skill = skill)
+                        }
                     }
                 }
             }
 
             item(key = "projects-title") {
-                SectionTitle(title = "Projets & expériences")
+                SectionTitle(title = "Projets & expériences", modifier = sectionModifier)
             }
             // Un item de la LazyColumn par projet (affichage détaillé à venir avec ProjectCard)
             items(items = profile.projects, key = { it.title }) { project ->
                 Text(
                     text = "${project.title} · ${project.period}",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = sectionModifier
                 )
             }
 
             item(key = "contact") {
-                Column {
+                Column(modifier = sectionModifier) {
                     SectionTitle(title = "Informations")
                     Spacer(modifier = Modifier.height(8.dp))
                     InfoLine(label = "Contact", value = profile.email)
@@ -94,7 +109,7 @@ fun ProfileScreen(
             }
 
             item(key = "actions") {
-                Column {
+                Column(modifier = sectionModifier) {
                     AvailabilityBadge(
                         isAvailable = profile.isAvailable,
                         onClick = onAvailabilityClick
