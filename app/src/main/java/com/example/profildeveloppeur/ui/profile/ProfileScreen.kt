@@ -89,13 +89,9 @@ fun ProfileScreen(
             item(key = "projects-title") {
                 SectionTitle(title = "Projets & expériences", modifier = sectionModifier)
             }
-            // Un item de la LazyColumn par projet (affichage détaillé à venir avec ProjectCard)
+            // Un item de la LazyColumn par projet, affiché avec le composable réutilisable ProjectCard
             items(items = profile.projects, key = { it.title }) { project ->
-                Text(
-                    text = "${project.title} · ${project.period}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = sectionModifier
-                )
+                ProjectCard(project = project, modifier = sectionModifier)
             }
 
             item(key = "contact") {

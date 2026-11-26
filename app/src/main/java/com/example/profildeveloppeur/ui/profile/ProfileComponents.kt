@@ -1,7 +1,9 @@
 package com.example.profildeveloppeur.ui.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,8 +21,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,11 +34,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import com.example.profildeveloppeur.R
+import com.example.profildeveloppeur.model.Project
+import com.example.profildeveloppeur.model.ProjectType
 import com.example.profildeveloppeur.model.Skill
 import com.example.profildeveloppeur.model.SkillCategory
 import androidx.compose.ui.semantics.Role
@@ -179,6 +187,122 @@ fun SkillChip(
                 style = MaterialTheme.typography.labelLarge
             )
         }
+    }
+}
+
+/**
+ * Carte réutilisable présentant un projet ou une expérience :
+ * titre + type, période, description et technologies utilisées.
+ */
+@Composable
+fun ProjectCard(
+    project: Project,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Row : titre à gauche (prend la place restante), type à droite
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = project.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                ProjectTypeLabel(type = project.type)
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.DateRange,
+                    contentDescription = "Période",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = project.period,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = project.description,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Row : technologies alignées sur une même ligne
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                project.technologies.forEach { technology ->
+                    TechnologyTag(name = technology)
+                }
+            }
+        }
+    }
+}
+
+/** Petite étiquette indiquant le type de projet, avec une couleur par type. */
+@Composable
+fun ProjectTypeLabel(
+    type: ProjectType,
+    modifier: Modifier = Modifier
+) {
+    val containerColor = when (type) {
+        ProjectType.PROFESSIONAL -> MaterialTheme.colorScheme.primaryContainer
+        ProjectType.SCHOOL -> MaterialTheme.colorScheme.secondaryContainer
+        ProjectType.PERSONAL -> MaterialTheme.colorScheme.tertiaryContainer
+    }
+    val contentColor = when (type) {
+        ProjectType.PROFESSIONAL -> MaterialTheme.colorScheme.onPrimaryContainer
+        ProjectType.SCHOOL -> MaterialTheme.colorScheme.onSecondaryContainer
+        ProjectType.PERSONAL -> MaterialTheme.colorScheme.onTertiaryContainer
+    }
+
+    Surface(
+        modifier = modifier,
+        color = containerColor,
+        contentColor = contentColor,
+        shape = MaterialTheme.shapes.extraSmall
+    ) {
+        Text(
+            text = type.label,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+        )
+    }
+}
+
+/** Technologie utilisée dans un projet, affichée sous forme de tag discret. */
+@Composable
+fun TechnologyTag(
+    name: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        color = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.primary,
+        shape = MaterialTheme.shapes.small,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
     }
 }
 
