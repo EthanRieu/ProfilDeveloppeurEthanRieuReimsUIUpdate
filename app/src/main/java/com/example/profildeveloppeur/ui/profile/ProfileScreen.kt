@@ -69,7 +69,7 @@ fun ProfileCard(
             // Pas de LazyColumn (non vue en cours) : une simple boucle sur la liste suffit
             profile.skills.forEach { skill ->
                 SkillItem(
-                    skill = skill,
+                    skill = skill.name,
                     modifier = Modifier.padding(top = 6.dp)
                 )
             }
@@ -80,7 +80,7 @@ fun ProfileCard(
             )
             InfoLine(
                 label = "Contact",
-                value = profile.contact,
+                value = profile.email,
                 modifier = Modifier.padding(top = 6.dp)
             )
             InfoLine(
