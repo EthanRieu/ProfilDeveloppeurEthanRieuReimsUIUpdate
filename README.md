@@ -1,101 +1,73 @@
-# Profil développeur Compose
+# Profil développeur — Amélioration UI
 
 Devoir ESGI M1 — Développement Android avec Jetpack Compose — Ethan Rieu (Reims)
 
 ## Description
 
-Cette application affiche une fiche « Profil développeur » réalisée avec Jetpack Compose.
-L'écran présente le nom, le rôle, une courte description, une liste de compétences,
-des informations de contact et de localisation, ainsi qu'un badge de disponibilité cliquable
-et un bouton « Contacter ». Les données du profil sont passées en paramètres, ce qui permet
-d'afficher plusieurs profils différents avec les mêmes composables (voir les deux previews).
+C'est la suite de ma première fiche « Profil développeur ». J'ai repris le projet pour en faire un vrai petit écran de profil, plus complet et plus propre.
+
+On y retrouve mon nom, mon rôle, une courte description, un avatar avec un badge de disponibilité, mes compétences, mes projets et expériences, une zone de contact et deux boutons d'action (« Contacter » et « Portfolio »). Les boutons ne font rien de réel pour l'instant, leurs callbacks sont vides.
+
+Toutes les données sont écrites directement en Kotlin dans `model/DeveloperProfile.kt`. Il y a deux profils : le mien et un profil fictif (Camille, full-stack, non disponible) pour tester les composables avec d'autres données.
 
 ## Captures
 
-**Previews** : deux variantes du profil (Android junior disponible / full-stack non disponible)
+| Clair | Sombre |
+|---|---|
+| <img src="screenshots/app-clair-haut.png" width="250"> | <img src="screenshots/app-sombre-haut.png" width="250"> |
+| <img src="screenshots/app-clair-bas.png" width="250"> | <img src="screenshots/app-sombre-bas.png" width="250"> |
 
-![Previews de la fiche profil](screenshots/preview.jpg)
+## Composants Compose utilisés
 
-**Application lancée sur l'émulateur** (Pixel 8)
+- `Text` pour tous les textes (nom, rôle, descriptions, titres de section…)
+- `Button` pour l'action principale « Contacter », et `OutlinedButton` pour « Portfolio »
+- `Icon` dans les pastilles de compétences, les cartes projet (calendrier), les champs de contact et les boutons
+- `Image` pour l'avatar (un vector drawable teinté avec la couleur du thème)
+- `Card` pour les projets et expériences (`ProjectCard`)
+- `OutlinedTextField` en lecture seule pour l'email, la localisation et la disponibilité (`ContactField`)
+- `Scaffold` pour la structure de l'écran
 
-<img src="screenshots/app.png" alt="Application lancée sur l'émulateur" width="300">
+## Layouts utilisés
 
-> Les couleurs diffèrent entre les previews et l'émulateur : le thème généré utilise les
-> couleurs dynamiques (Android 12+), calculées à partir du fond d'écran de l'appareil.
-> Les previews désactivent cette option (`dynamicColor = false`) pour garder un rendu stable.
+- `Column` pour empiler les éléments verticalement (contenu des cartes, zone de contact…)
+- `Row` pour aligner sur une même ligne : avatar + nom dans l'en-tête, titre + type de projet, icône + texte, les deux boutons
+- `Box` pour superposer le badge de disponibilité sur l'avatar
+- `Spacer` pour gérer les espaces entre les éléments
+- `Surface` pour l'en-tête (fond bleu), la zone de contact et les petites pastilles
 
-## Notions utilisées
+## Les listes (LazyColumn et LazyRow)
 
-- fonctions composables (`@Composable`) ;
-- paramètres et données passées aux composables (`DeveloperProfile`) ;
-- `Modifier` passé en paramètre (`modifier: Modifier = Modifier`) ;
-- chaînage de modifiers (`fillMaxWidth().clickable().semantics { }`) ;
-- padding externe / padding interne ;
-- callbacks (`onClick`, `onContactClick`, `onAvailabilityClick`) ;
-- `Scaffold` et `innerPadding` ;
-- composants `Text`, `Button`, `Surface`, `Column` ;
-- thème généré du projet (`MaterialTheme`) ;
-- previews (`@Preview`) ;
-- accessibilité de base (`semantics`, `Role.Button`, `contentDescription`).
+L'écran entier est une `LazyColumn`. Chaque section de la fiche (en-tête, description, compétences, projets, contact, actions) est un `item`, et les projets sont ajoutés avec `items(profile.projects)` : un élément par projet, affiché avec `ProjectCard`. Ça permet à l'écran de défiler et de ne composer que ce qui est visible.
 
-## Structure du code
+Les compétences sont dans une `LazyRow` horizontale. Chaque compétence est affichée avec `SkillChip`, une pastille avec une icône qui dépend de la catégorie (langage, framework, outil, base de données). J'ai fait en sorte que la `LazyRow` aille jusqu'au bord de l'écran, comme ça on voit la pastille suivante dépasser et on comprend qu'on peut faire défiler.
 
-```
-app/src/main/java/com/example/profildeveloppeur/
-├── MainActivity.kt                 # setContent + ProfileScreen avec les callbacks
-├── model/DeveloperProfile.kt       # data class + deux profils d'exemple
-└── ui/profile/
-    ├── ProfileScreen.kt            # ProfileScreen, ProfileCard + les 2 previews
-    └── ProfileComponents.kt        # petits composables réutilisables
-```
+## Choix du thème
 
-## Explication courte
+J'ai remplacé les violets du template par ma propre palette Material 3 :
 
-**1. Quels composables avez-vous créés ?**
-`ProfileScreen`, `ProfileCard`, `ProfileHeader`, `SectionTitle`, `SkillItem`, `InfoLine`,
-`AvailabilityBadge` et `ContactButton`, ainsi que deux previews :
-`ProfileScreenAndroidJuniorPreview` et `ProfileScreenFullstackPreview`.
+- un **bleu océan** en couleur principale, qui fait sérieux et reste lisible ;
+- un **bleu-gris** comme couleur secondaire, plus neutre, pour les pastilles ;
+- un **vert** en tertiaire, que je garde pour ce qui est positif (le badge « disponible », les projets perso).
 
-**2. Quel composable représente l'écran principal ?**
-`ProfileScreen`. Il contient le `Scaffold` et place la fiche (`ProfileCard`) dans l'écran.
-Il est appelé dans `MainActivity` via `setContent`.
+Chaque couleur a sa version claire et sombre, et j'ai aussi défini les couleurs de surface (`surfaceContainer…`) pour que les cartes et les zones ne gardent pas la teinte violette par défaut.
 
-**3. Où utilisez-vous un padding externe ?**
-Dans `ProfileScreen`, le parent place la carte avec
-`Modifier.padding(innerPadding).padding(16.dp)` : la carte est décalée des bords de l'écran
-et des barres système. Dans `ProfileCard`, les éléments sont aussi espacés par le parent avec
-`Modifier.padding(top = ...)` passé à `SkillItem`, `InfoLine`, `AvailabilityBadge`, etc.
-C'est le parent qui décide de la position du composant.
+J'ai aussi personnalisé la typographie (`Type.kt`) et les formes (`Shape.kt`) : petits arrondis pour les pastilles, plus grands pour les cartes et l'en-tête. Tout passe par `MaterialTheme.colorScheme`, `MaterialTheme.typography` et `MaterialTheme.shapes`.
 
-**4. Où utilisez-vous un padding interne ?**
-Dans `ProfileCard` (`Column(Modifier.padding(20.dp))` à l'intérieur de la `Surface`),
-dans `SkillItem` (padding autour du texte de la pastille) et dans `AvailabilityBadge`
-(`padding(12.dp)` autour du texte). C'est le composant lui-même qui espace son contenu
-par rapport à ses propres bords.
+Le thème suit le mode clair / sombre du téléphone. J'ai désactivé les couleurs dynamiques d'Android 12+ par défaut, sinon l'appli prend les couleurs du fond d'écran et perd son identité.
 
-**5. Quel composant reçoit un callback ?**
-`ContactButton` reçoit `onClick` et `AvailabilityBadge` reçoit `onClick`.
-Ils remontent par `ProfileCard` et `ProfileScreen` (`onContactClick`, `onAvailabilityClick`)
-jusqu'à `MainActivity`, qui fournit pour l'instant des lambdas vides commentées.
-Les composants signalent l'événement mais ne décident pas de la logique.
+## Previews
 
-**6. Quelle information d'accessibilité avez-vous ajoutée ?**
-`AvailabilityBadge` est une zone cliquable personnalisée (`Surface` + `clickable`).
-J'y ai ajouté `semantics { role = Role.Button; contentDescription = "..." }` : un lecteur d'écran
-annonce donc un bouton et lit une description claire de l'action
-(ex. « Disponible pour une alternance. Appuyer pour en savoir plus. »).
-Pour `ContactButton`, j'utilise `Button` : ce composant expose déjà le rôle de bouton
-et son texte aux outils d'accessibilité, il est donc plus explicite qu'une simple zone cliquable.
+- `ProfileScreen.kt` : l'écran complet en clair, en sombre, et le profil full-stack en entier.
+- `ProfileComponentsPreviews.kt` : une preview par composant (`ProfileHeader`, `AvatarWithBadge`, `SkillChip`, `ProjectCard`, `ContactField`, `ProfileActions`), chacune en clair et en sombre avec `@PreviewLightDark`.
 
-**7. Pourquoi vos composants peuvent-ils être considérés comme réutilisables ?**
-Ils n'affichent aucune donnée en dur : tout est reçu en paramètres (nom, rôle, compétence,
-libellé, texte du bouton, callback…). Chacun accepte un `modifier: Modifier = Modifier`
-appliqué à son élément racine, ce qui laisse le parent décider de son placement.
-La preuve : les deux previews affichent deux profils différents avec exactement les mêmes composables,
-et `SkillItem` / `InfoLine` sont réutilisés plusieurs fois dans la fiche.
+## Quelles notions du chapitre Compose UI avez-vous réutilisées dans cette application ?
+
+J'ai réutilisé à peu près tout le chapitre. Les composants de base (`Text`, `Button`, `Icon`, `Image`, `Card`, `OutlinedTextField` en lecture seule), les layouts (`Column`, `Row`, `Box`, `Spacer`, `Surface`), les listes modernes avec une `LazyColumn` pour l'écran et une `LazyRow` pour les compétences, et des cartes réutilisables comme `ProjectCard` et `SkillChip`.
+
+Côté Material Design 3, j'ai personnalisé les couleurs, la typo et les formes, avec un rendu clair et un rendu sombre. Et j'ai gardé les bonnes pratiques du premier devoir : composables qui reçoivent leurs données en paramètres, un `modifier` sur chaque composable, des callbacks pour les clics et des previews.
 
 ## Lancer le projet
 
 1. Ouvrir le dossier dans Android Studio.
 2. Attendre la synchronisation Gradle.
-3. Lancer la configuration `app` sur un émulateur, ou ouvrir `ProfileScreen.kt` en mode *Split* pour voir les previews.
+3. Lancer la configuration `app` sur un émulateur, ou ouvrir `ProfileScreen.kt` / `ProfileComponentsPreviews.kt` en mode *Split* pour voir les previews.
