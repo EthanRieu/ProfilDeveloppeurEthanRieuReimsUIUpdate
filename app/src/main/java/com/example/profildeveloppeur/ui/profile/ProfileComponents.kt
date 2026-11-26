@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Create
@@ -28,10 +28,12 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,9 +51,7 @@ import com.example.profildeveloppeur.model.Project
 import com.example.profildeveloppeur.model.ProjectType
 import com.example.profildeveloppeur.model.Skill
 import com.example.profildeveloppeur.model.SkillCategory
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
@@ -392,58 +392,48 @@ fun ContactField(
 }
 
 /**
- * Zone cliquable PERSONNALISÉE indiquant la disponibilité.
- * Le composant signale seulement le clic via [onClick] : c'est le parent qui décide quoi faire.
+ * Actions utilisateur : bouton principal « Contacter » et bouton secondaire « Portfolio »,
+ * côte à côte dans une Row (même largeur grâce à weight).
+ * Les clics sont remontés au parent via les callbacks : ce composant ne décide pas de l'action.
  */
 @Composable
-fun AvailabilityBadge(
-    isAvailable: Boolean,
-    onClick: () -> Unit,
+fun ProfileActions(
+    onContactClick: () -> Unit,
+    onPortfolioClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val label = if (isAvailable) {
-        "Disponible pour une alternance"
-    } else {
-        "Non disponible actuellement"
-    }
-
-    Surface(
-        // Chaîne de modifiers : on part du modifier du parent, puis
-        // largeur -> clic -> sémantique pour les lecteurs d'écran
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .semantics {
-                role = Role.Button
-                contentDescription = "$label. Appuyer pour en savoir plus."
-            },
-        color = if (isAvailable) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            MaterialTheme.colorScheme.errorContainer
-        },
-        shape = MaterialTheme.shapes.medium
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Padding INTERNE : espace autour du texte à l'intérieur du badge
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(12.dp)
-        )
-    }
-}
+        Button(
+            onClick = onContactClick,
+            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Email,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+            Text(text = "Contacter")
+        }
 
-/** Bouton d'action principal. Le clic est remonté au parent via [onClick]. */
-@Composable
-fun ContactButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Text(text = text)
+        OutlinedButton(
+            onClick = onPortfolioClick,
+            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+            modifier = Modifier
+                .weight(1f)
+                .semantics { contentDescription = "Voir le portfolio" }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AccountBox,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+            Text(text = "Portfolio")
+        }
     }
 }

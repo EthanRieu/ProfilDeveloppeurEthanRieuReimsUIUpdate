@@ -33,7 +33,7 @@ private val ScreenHorizontalPadding = 16.dp
 fun ProfileScreen(
     profile: DeveloperProfile,
     onContactClick: () -> Unit,
-    onAvailabilityClick: () -> Unit,
+    onPortfolioClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Marge horizontale commune à toutes les sections de la fiche
@@ -105,17 +105,11 @@ fun ProfileScreen(
             }
 
             item(key = "actions") {
-                Column(modifier = sectionModifier) {
-                    AvailabilityBadge(
-                        isAvailable = profile.isAvailable,
-                        onClick = onAvailabilityClick
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ContactButton(
-                        text = "Contacter ${profile.name}",
-                        onClick = onContactClick
-                    )
-                }
+                ProfileActions(
+                    onContactClick = onContactClick,
+                    onPortfolioClick = onPortfolioClick,
+                    modifier = sectionModifier
+                )
             }
         }
     }
@@ -128,7 +122,7 @@ fun ProfileScreenAndroidJuniorPreview() {
         ProfileScreen(
             profile = androidJuniorProfile,
             onContactClick = {},
-            onAvailabilityClick = {}
+            onPortfolioClick = {}
         )
     }
 }
@@ -140,7 +134,7 @@ fun ProfileScreenFullstackPreview() {
         ProfileScreen(
             profile = fullstackProfile,
             onContactClick = {},
-            onAvailabilityClick = {}
+            onPortfolioClick = {}
         )
     }
 }
