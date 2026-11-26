@@ -44,7 +44,12 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item(key = "header") {
-                ProfileHeader(name = profile.name, role = profile.role)
+                ProfileHeader(
+                    name = profile.name,
+                    role = profile.role,
+                    location = profile.location,
+                    isAvailable = profile.isAvailable
+                )
             }
 
             item(key = "description") {
