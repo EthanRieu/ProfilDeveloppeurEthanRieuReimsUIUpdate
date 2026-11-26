@@ -1,12 +1,18 @@
 package com.example.profildeveloppeur.ui.profile
 
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,113 +23,151 @@ import com.example.profildeveloppeur.model.androidJuniorProfile
 import com.example.profildeveloppeur.model.fullstackProfile
 import com.example.profildeveloppeur.ui.theme.ProfilDeveloppeurTheme
 
-/** Écran principal : structure de la page (Scaffold) qui place la fiche profil. */
+private val ScreenHorizontalPadding = 16.dp
+
+/**
+ * Écran principal : un Scaffold qui contient une LazyColumn.
+ * Chaque section de la fiche est un `item` de la liste : l'écran défile verticalement
+ * et seuls les éléments visibles sont composés.
+ */
 @Composable
 fun ProfileScreen(
     profile: DeveloperProfile,
     onContactClick: () -> Unit,
-    onAvailabilityClick: () -> Unit,
+    onPortfolioClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Marge horizontale commune à toutes les sections de la fiche
+    val sectionModifier = Modifier.padding(horizontal = ScreenHorizontalPadding)
+
     Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
-        ProfileCard(
-            profile = profile,
-            onContactClick = onContactClick,
-            onAvailabilityClick = onAvailabilityClick,
-            // Padding EXTERNE : décidé par le parent pour placer la carte dans l'écran
-            // (innerPadding évite les barres système, 16.dp écarte la carte des bords)
+        LazyColumn(
+            // innerPadding évite les barres système. La marge horizontale est appliquée
+            // par section (sectionModifier) pour laisser la LazyRow défiler jusqu'aux bords.
             modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-        )
-    }
-}
-
-/** Fiche profil complète, assemblée à partir des petits composables réutilisables. */
-@Composable
-fun ProfileCard(
-    profile: DeveloperProfile,
-    onContactClick: () -> Unit,
-    onAvailabilityClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.large
-    ) {
-        // Padding INTERNE : espace entre le bord de la carte et son contenu
-        Column(modifier = Modifier.padding(20.dp)) {
-            ProfileHeader(name = profile.name, role = profile.role)
-
-            Text(
-                text = profile.description,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 12.dp)
-            )
-
-            SectionTitle(
-                title = "Compétences",
-                modifier = Modifier.padding(top = 16.dp)
-            )
-            // Pas de LazyColumn (non vue en cours) : une simple boucle sur la liste suffit
-            profile.skills.forEach { skill ->
-                SkillItem(
-                    skill = skill,
-                    modifier = Modifier.padding(top = 6.dp)
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(vertical = 24.dp),
+            // Espace identique entre toutes les sections
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            item(key = "header") {
+                ProfileHeader(
+                    name = profile.name,
+                    role = profile.role,
+                    location = profile.location,
+                    isAvailable = profile.isAvailable,
+                    modifier = sectionModifier
                 )
             }
 
-            SectionTitle(
-                title = "Informations",
-                modifier = Modifier.padding(top = 16.dp)
-            )
-            InfoLine(
-                label = "Contact",
-                value = profile.contact,
-                modifier = Modifier.padding(top = 6.dp)
-            )
-            InfoLine(
-                label = "Localisation",
-                value = profile.location,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+            item(key = "description") {
+                Text(
+                    text = profile.description,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = sectionModifier
+                )
+            }
 
-            AvailabilityBadge(
-                isAvailable = profile.isAvailable,
-                onClick = onAvailabilityClick,
-                modifier = Modifier.padding(top = 16.dp)
-            )
+            item(key = "skills") {
+                Column {
+                    SectionTitle(title = "Compétences", modifier = sectionModifier)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // LazyRow : liste horizontale, chaque compétence est un SkillChip réutilisable.
+                    // Elle occupe toute la largeur ; le contentPadding aligne la 1re pastille
+                    // sur les autres sections tout en laissant défiler sous les bords.
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = ScreenHorizontalPadding),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(items = profile.skills, key = { it.name }) { skill ->
+                            SkillChip(skill = skill)
+                        }
+                    }
+                }
+            }
 
-            ContactButton(
-                text = "Contacter ${profile.name}",
-                onClick = onContactClick,
-                modifier = Modifier.padding(top = 12.dp)
-            )
+            item(key = "projects-title") {
+                SectionTitle(title = "Projets & expériences", modifier = sectionModifier)
+            }
+            // Un item de la LazyColumn par projet, affiché avec le composable réutilisable ProjectCard
+            items(items = profile.projects, key = { it.title }) { project ->
+                ProjectCard(project = project, modifier = sectionModifier)
+            }
+
+            item(key = "contact") {
+                ContactSection(
+                    email = profile.email,
+                    location = profile.location,
+                    availability = profile.availability,
+                    isAvailable = profile.isAvailable,
+                    modifier = sectionModifier
+                )
+            }
+
+            item(key = "actions") {
+                ProfileActions(
+                    onContactClick = onContactClick,
+                    onPortfolioClick = onPortfolioClick,
+                    modifier = sectionModifier
+                )
+            }
         }
     }
 }
 
-@Preview(name = "Profil Android junior (disponible)", showBackground = true)
+// ---------- Previews de l'écran complet ----------
+// showSystemUi affiche la fiche dans un cadre de téléphone ; heightDp (dernière preview)
+// agrandit la zone pour voir toute la fiche d'un coup.
+
+@Preview(
+    name = "Écran — Android junior · clair",
+    group = "Écran",
+    showBackground = true,
+    showSystemUi = true
+)
 @Composable
-fun ProfileScreenAndroidJuniorPreview() {
-    ProfilDeveloppeurTheme(dynamicColor = false) {
+fun ProfileScreenLightPreview() {
+    ProfilDeveloppeurTheme(darkTheme = false) {
         ProfileScreen(
             profile = androidJuniorProfile,
             onContactClick = {},
-            onAvailabilityClick = {}
+            onPortfolioClick = {}
         )
     }
 }
 
-@Preview(name = "Profil full-stack (non disponible)", showBackground = true)
+@Preview(
+    name = "Écran — Android junior · sombre",
+    group = "Écran",
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+fun ProfileScreenDarkPreview() {
+    ProfilDeveloppeurTheme(darkTheme = true) {
+        ProfileScreen(
+            profile = androidJuniorProfile,
+            onContactClick = {},
+            onPortfolioClick = {}
+        )
+    }
+}
+
+@Preview(
+    name = "Écran — Full-stack (non disponible) · fiche complète",
+    group = "Écran",
+    showBackground = true,
+    heightDp = 1800
+)
 @Composable
 fun ProfileScreenFullstackPreview() {
-    ProfilDeveloppeurTheme(dynamicColor = false) {
+    ProfilDeveloppeurTheme(darkTheme = false) {
         ProfileScreen(
             profile = fullstackProfile,
             onContactClick = {},
-            onAvailabilityClick = {}
+            onPortfolioClick = {}
         )
     }
 }

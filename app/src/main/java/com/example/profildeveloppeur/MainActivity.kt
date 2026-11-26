@@ -17,10 +17,12 @@ class MainActivity : ComponentActivity() {
                 ProfileScreen(
                     profile = androidJuniorProfile,
                     onContactClick = {
-                        // Plus tard : ouvrir l'application mail pour contacter le développeur
+                        // Callback volontairement vide (hors périmètre du devoir) :
+                        // plus tard, ouvrir l'application mail avec l'adresse du profil
                     },
-                    onAvailabilityClick = {
-                        // Plus tard : afficher le détail de la disponibilité
+                    onPortfolioClick = {
+                        // Callback volontairement vide (hors périmètre du devoir) :
+                        // plus tard, ouvrir le lien du portfolio dans le navigateur
                     }
                 )
             }
